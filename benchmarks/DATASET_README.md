@@ -5,12 +5,17 @@ IRR root-finding methods.
 
 Dataset DOI: https://doi.org/10.5281/zenodo.20429258
 
-The dataset has two parts:
+Current dataset package version: 1.1.0
+
+The dataset has three parts:
 
 - `sourced_cases.csv` and `results/sourced_benchmark*.csv`: public online
   teaching and reference cases used as the primary external evidence set.
 - `results/paper_benchmark*.csv`: generated and manuscript-derived stress cases
   used as supplementary robustness evidence.
+- `company_proxy_cases.csv` and `results/expanded_benchmark*.csv`: expanded
+  robustness evidence combining sourced cases, generated stress cases, and
+  SEC Companyfacts firm-level free-cash-flow proxy sequences.
 
 The sourced benchmark is the primary dataset for external validation because it
 records the source name, source URL, required rate of return notes, cash-flow
@@ -20,6 +25,11 @@ timing fields.
 The generated benchmark is included for transparency and repeatability. It
 should be labelled as simulated stress evidence in manuscripts rather than as
 external published-case evidence.
+
+The SEC company proxy cases should be labelled carefully. They are public,
+company-level accounting sequences built from SEC Companyfacts data; they are
+not disclosed project appraisal cash flows and should not be described as real
+corporate capital-budgeting project cases.
 
 ## Software
 
@@ -34,14 +44,22 @@ The benchmark was generated with Evbayiro-IRR 0.1.1.
 From the repository root:
 
 ```powershell
+python -m pip install -r benchmarks\requirements.txt --target .benchmark_deps
 python benchmarks\sourced_benchmark.py
 python benchmarks\paper_benchmark.py --per-type 10
+python benchmarks\company_proxy_cases.py --limit 50
+python benchmarks\expanded_benchmark.py --target-cases 220
+python benchmarks\summarize_expanded_results.py
 ```
 
 ## Interpretation
 
 `evbayiro_rrr_first` reports the RRR-anchored decision and the
 decision-relevant IRR boundary. Newton-Raphson and Secant rows are repeated with
-different initial guesses to expose seed sensitivity. `bisection_known_bracket`
-is a control method that receives the known decision-relevant bracket and is not
-used as a normal unanchored competitor.
+different initial guesses to expose seed sensitivity. `excel_default_guess_proxy`
+uses the package Newton implementation with a 10% default starting value and a
+20-iteration limit as a transparent proxy for Excel-style default-guess behavior;
+it is not an exact reimplementation of Microsoft Excel. `numpy_financial_irr`
+and `pyxirr_irr` evaluate common Python finance-library interfaces.
+`bisection_known_bracket` is a control method that receives the known
+decision-relevant bracket and is not used as a normal unanchored competitor.

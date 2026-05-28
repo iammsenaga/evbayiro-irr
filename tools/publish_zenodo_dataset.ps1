@@ -3,7 +3,11 @@ param(
     [string]$DatasetZip,
 
     [Parameter(Mandatory = $true)]
-    [string]$OutputJson
+    [string]$OutputJson,
+
+    [string]$ExistingDepositionId = "20429258",
+
+    [string]$DatasetVersion = "1.1.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -35,7 +39,7 @@ $headers = @{
 }
 
 $description = @"
-Benchmark dataset for comparing Evbayiro-IRR 0.1.1 with Newton-Raphson, Secant, and known-bracket bisection on capital budgeting cash-flow cases. The dataset includes 49 public online sourced cases as primary external evidence and 22 generated/manuscript-derived stress cases as supplementary robustness evidence. It includes case metadata, solver outputs, convergence statuses, root-relation labels, decision-match fields, timing summaries, and regeneration scripts.
+Benchmark dataset for comparing Evbayiro-IRR 0.1.1 with capital budgeting IRR interfaces and root-finding methods. Version $DatasetVersion expands the archived evidence by adding an Excel-style default-guess proxy, numpy_financial.irr, pyxirr.irr, and SEC Companyfacts firm-level free-cash-flow proxy cases. The dataset includes 49 public online sourced cases as primary external evidence, 50 SEC public-company proxy sequences as supplementary public-company evidence, and generated/manuscript-derived stress cases for reproducibility. It includes case metadata, solver outputs, convergence statuses, root-relation labels, decision-match fields, timing summaries, and regeneration scripts. SEC company proxy cases are firm-level accounting sequences, not disclosed project appraisal cash flows.
 "@
 
 $metadata = @{
@@ -51,7 +55,7 @@ $metadata = @{
         access_right = "open"
         license = "cc-by-4.0"
         publication_date = "2026-05-28"
-        version = "1.0.0"
+        version = $DatasetVersion
         keywords = @(
             "Evbayiro-IRR",
             "IRR",
@@ -62,7 +66,10 @@ $metadata = @{
             "multiple IRR",
             "Newton-Raphson",
             "Secant method",
-            "benchmark dataset"
+            "benchmark dataset",
+            "numpy-financial",
+            "PyXIRR",
+            "SEC Companyfacts"
         )
         related_identifiers = @(
             @{
@@ -75,13 +82,46 @@ $metadata = @{
 }
 
 Write-Host ""
-Write-Host "Creating Zenodo deposition..."
-$deposition = Invoke-RestMethod `
-    -Method Post `
-    -Uri "https://zenodo.org/api/deposit/depositions" `
-    -Headers $headers `
-    -ContentType "application/json" `
-    -Body "{}"
+if ([string]::IsNullOrWhiteSpace($ExistingDepositionId)) {
+    Write-Host "Creating new Zenodo deposition..."
+    $deposition = Invoke-RestMethod `
+        -Method Post `
+        -Uri "https://zenodo.org/api/deposit/depositions" `
+        -Headers $headers `
+        -ContentType "application/json" `
+        -Body "{}"
+} else {
+    Write-Host "Creating new version from Zenodo deposition $ExistingDepositionId..."
+    $newVersion = Invoke-RestMethod `
+        -Method Post `
+        -Uri "https://zenodo.org/api/deposit/depositions/$ExistingDepositionId/actions/newversion" `
+        -Headers $headers
+
+    if ($newVersion.links.latest_draft) {
+        $deposition = Invoke-RestMethod `
+            -Method Get `
+            -Uri $newVersion.links.latest_draft `
+            -Headers $headers
+    } else {
+        $deposition = $newVersion
+    }
+
+    if ($deposition.files) {
+        Write-Host "Removing copied files from draft version..."
+        foreach ($file in $deposition.files) {
+            $deleteUri = $file.links.self
+            if (-not $deleteUri -and $file.id) {
+                $deleteUri = "https://zenodo.org/api/deposit/depositions/$($deposition.id)/files/$($file.id)"
+            }
+            if ($deleteUri) {
+                Invoke-RestMethod `
+                    -Method Delete `
+                    -Uri $deleteUri `
+                    -Headers $headers | Out-Null
+            }
+        }
+    }
+}
 
 $bucketUrl = $deposition.links.bucket
 $fileName = Split-Path -Leaf $DatasetZip
@@ -107,6 +147,7 @@ $updated = Invoke-RestMethod `
 Write-Host ""
 Write-Host "Ready to publish:"
 Write-Host "Title: $($updated.metadata.title)"
+Write-Host "Version: $($updated.metadata.version)"
 Write-Host "Deposition ID: $($updated.id)"
 Write-Host ""
 Write-Host "Publishing is permanent on Zenodo."

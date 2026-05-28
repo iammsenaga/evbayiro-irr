@@ -4,6 +4,7 @@ __pycache__/
 *.pyd
 .Python
 .venv/
+.benchmark_deps/
 venv/
 env/
 .pytest_cache/

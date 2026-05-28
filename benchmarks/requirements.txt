@@ -1,0 +1,2 @@
+numpy-financial==1.0.0
+pyxirr==0.10.8

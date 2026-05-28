@@ -1,0 +1,15 @@
+metric,category,count
+case_type,generated_conventional,61
+case_type,generated_non_conventional,58
+case_type,manuscript_conventional,1
+case_type,manuscript_non_conventional,1
+case_type,sec_company_fcf_proxy,50
+case_type,sourced_conventional,27
+case_type,sourced_non_conventional,5
+case_type,sourced_ranking_conflict,8
+case_type,sourced_reinvestment_timing,3
+case_type,sourced_scale_conflict,6
+cashflow_type,conventional,145
+cashflow_type,non_conventional,75
+total_cases,all,220
+total_method_rows,all,2417

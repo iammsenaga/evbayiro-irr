@@ -107,3 +107,8 @@ python -m unittest discover -s tests
 The benchmark dataset used for comparative analysis is archived separately:
 
 - Dataset DOI: https://doi.org/10.5281/zenodo.20429258
+- Current benchmark package: 49 sourced public cases, 50 SEC public-company
+  proxy sequences, and generated/manuscript stress cases.
+- Comparative interfaces include Evbayiro RRR-First, Newton-Raphson, Secant,
+  an Excel-style default-guess proxy, `numpy_financial.irr`, `pyxirr.irr`, and
+  known-bracket bisection as a control.

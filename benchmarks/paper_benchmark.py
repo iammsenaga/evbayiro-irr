@@ -7,6 +7,7 @@ import csv
 import random
 import sys
 from dataclasses import dataclass
+from math import isfinite
 from pathlib import Path
 from time import perf_counter
 from typing import Callable, Iterable, List, Optional, Sequence
@@ -15,6 +16,19 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
+BENCHMARK_DEPS = ROOT / ".benchmark_deps"
+if BENCHMARK_DEPS.exists() and str(BENCHMARK_DEPS) not in sys.path:
+    sys.path.insert(0, str(BENCHMARK_DEPS))
+
+try:
+    import numpy_financial as npf
+except ImportError:  # pragma: no cover - optional benchmark dependency
+    npf = None
+
+try:
+    import pyxirr
+except ImportError:  # pragma: no cover - optional benchmark dependency
+    pyxirr = None
 
 from evbayiro_irr import bisection_irr, evbayiro_analysis, newton_irr, secant_irr
 from evbayiro_irr.cashflows import classify_cashflows
@@ -25,6 +39,8 @@ from evbayiro_irr.examples import (
     manuscript_non_conventional_example,
 )
 from evbayiro_irr.results import CashflowType, EvbayiroResult
+
+BENCHMARK_EVBAYIRO_MAX_STEPS = 5000
 
 
 @dataclass(frozen=True)
@@ -93,6 +109,16 @@ def npv_at_root(cashflows: Sequence[float], root: Optional[float]) -> str:
         return fmt_float(npv(root, cashflows))
     except ValueError:
         return ""
+
+
+def finite_root(value: object) -> Optional[float]:
+    try:
+        root = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not isfinite(root) or root <= -1:
+        return None
+    return root
 
 
 def make_conventional_case(case_id: str, rng: random.Random) -> BenchmarkCase:
@@ -175,7 +201,13 @@ def base_row(case: BenchmarkCase, evbayiro_result) -> dict:
 
 def benchmark_case(case: BenchmarkCase) -> list[dict]:
     rows: List[dict] = []
-    evbayiro_result, elapsed = timed(lambda: evbayiro_analysis(case.cashflows, rrr=case.rrr))
+    evbayiro_result, elapsed = timed(
+        lambda: evbayiro_analysis(
+            case.cashflows,
+            rrr=case.rrr,
+            max_steps=BENCHMARK_EVBAYIRO_MAX_STEPS,
+        )
+    )
     row = base_row(case, evbayiro_result)
     evbayiro_root = evbayiro_result.decision_relevant_irr
     evbayiro_root_decision = method_decision(evbayiro_root, case.rrr)
@@ -250,6 +282,89 @@ def benchmark_case(case: BenchmarkCase) -> list[dict]:
                 "converged": solver_result.converged,
                 "status": solver_result.status,
                 "iterations_or_trials": solver_result.iterations,
+                "time_seconds": f"{elapsed:.9f}",
+            }
+        )
+        rows.append(row)
+
+    solver_result, elapsed = timed(lambda: newton_irr(case.cashflows, initial_guess=0.10, max_iterations=20))
+    row = base_row(case, evbayiro_result)
+    solver_decision = method_decision(solver_result.root, case.rrr)
+    row.update(
+        {
+            "method": "excel_default_guess_proxy",
+            "decision_rule": "root_vs_rrr_default_guess_10pct_proxy",
+            "seed": "0.1",
+            "root": fmt_float(solver_result.root),
+            "npv_at_root": npv_at_root(case.cashflows, solver_result.root),
+            "root_error_to_relevant_bps": root_error_bps(solver_result.root, evbayiro_result),
+            "root_relation": root_relation(solver_result.root, evbayiro_result),
+            "method_decision_from_root": solver_decision,
+            "method_decision": solver_decision,
+            "decision_matches_npv": decision_matches_npv(solver_decision, evbayiro_result.decision.value),
+            "converged": solver_result.converged,
+            "status": solver_result.status,
+            "iterations_or_trials": solver_result.iterations,
+            "time_seconds": f"{elapsed:.9f}",
+        }
+    )
+    rows.append(row)
+
+    if npf is not None:
+        def run_numpy_financial_irr() -> Optional[float]:
+            return finite_root(npf.irr(case.cashflows))
+
+        root, elapsed = timed(run_numpy_financial_irr)
+        row = base_row(case, evbayiro_result)
+        solver_decision = method_decision(root, case.rrr)
+        row.update(
+            {
+                "method": "numpy_financial_irr",
+                "decision_rule": "root_vs_rrr_scalar_finance_function",
+                "seed": "",
+                "root": fmt_float(root),
+                "npv_at_root": npv_at_root(case.cashflows, root),
+                "root_error_to_relevant_bps": root_error_bps(root, evbayiro_result),
+                "root_relation": root_relation(root, evbayiro_result),
+                "method_decision_from_root": solver_decision,
+                "method_decision": solver_decision,
+                "decision_matches_npv": decision_matches_npv(solver_decision, evbayiro_result.decision.value),
+                "converged": root is not None,
+                "status": "completed" if root is not None else "no_root_returned",
+                "iterations_or_trials": 1,
+                "time_seconds": f"{elapsed:.9f}",
+            }
+        )
+        rows.append(row)
+
+    if pyxirr is not None:
+        def run_pyxirr_irr() -> Optional[float]:
+            return finite_root(pyxirr.irr(case.cashflows))
+
+        try:
+            root, elapsed = timed(run_pyxirr_irr)
+            status = "completed" if root is not None else "no_root_returned"
+        except Exception as error:  # pyxirr raises on same-sign cash flows
+            root = None
+            elapsed = 0.0
+            status = type(error).__name__
+        row = base_row(case, evbayiro_result)
+        solver_decision = method_decision(root, case.rrr)
+        row.update(
+            {
+                "method": "pyxirr_irr",
+                "decision_rule": "root_vs_rrr_library_multiple_irr_policy",
+                "seed": "",
+                "root": fmt_float(root),
+                "npv_at_root": npv_at_root(case.cashflows, root),
+                "root_error_to_relevant_bps": root_error_bps(root, evbayiro_result),
+                "root_relation": root_relation(root, evbayiro_result),
+                "method_decision_from_root": solver_decision,
+                "method_decision": solver_decision,
+                "decision_matches_npv": decision_matches_npv(solver_decision, evbayiro_result.decision.value),
+                "converged": root is not None,
+                "status": status,
+                "iterations_or_trials": 1,
                 "time_seconds": f"{elapsed:.9f}",
             }
         )
