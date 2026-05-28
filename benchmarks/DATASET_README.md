@@ -3,6 +3,8 @@
 This dataset supports reproducible evaluation of Evbayiro-IRR against standard
 IRR root-finding methods.
 
+Dataset DOI: https://doi.org/10.5281/zenodo.20429258
+
 The dataset has two parts:
 
 - `sourced_cases.csv` and `results/sourced_benchmark*.csv`: public online

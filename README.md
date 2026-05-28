@@ -3,6 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/evbayiro-irr.svg)](https://pypi.org/project/evbayiro-irr/)
 [![CI](https://github.com/iammsenaga/evbayiro-irr/actions/workflows/ci.yml/badge.svg)](https://github.com/iammsenaga/evbayiro-irr/actions/workflows/ci.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20428636.svg)](https://doi.org/10.5281/zenodo.20428636)
+[![Benchmark DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20429258.svg)](https://doi.org/10.5281/zenodo.20429258)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Evbayiro-IRR is an open-source Python library for decision-first capital
@@ -100,3 +101,9 @@ Run the tests with:
 ```powershell
 python -m unittest discover -s tests
 ```
+
+## Research Data
+
+The benchmark dataset used for comparative analysis is archived separately:
+
+- Dataset DOI: https://doi.org/10.5281/zenodo.20429258
