@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use Evbayiro-IRR, please cite it as below."
+title: "Evbayiro-IRR: A Python Library for RRR-First Capital Budgeting Analysis"
+authors:
+  - family-names: Evbayiro
+    given-names: Osasenaga David
+version: 0.1.0
+date-released: 2026-05-28
+license: MIT
