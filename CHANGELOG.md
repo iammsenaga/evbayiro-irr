@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 - 2026-05-28
+
+- Added public repository badges to the README.
+- Prepared the release stream for software DOI archiving.
+
 ## 0.1.0 - 2026-05-28
 
 - Initial public release of Evbayiro-IRR.

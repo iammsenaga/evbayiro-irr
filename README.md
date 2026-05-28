@@ -1,5 +1,9 @@
 # Evbayiro-IRR
 
+[![PyPI version](https://img.shields.io/pypi/v/evbayiro-irr.svg)](https://pypi.org/project/evbayiro-irr/)
+[![CI](https://github.com/iammsenaga/evbayiro-irr/actions/workflows/ci.yml/badge.svg)](https://github.com/iammsenaga/evbayiro-irr/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Evbayiro-IRR is an open-source Python library for decision-first capital
 budgeting analysis. It implements the Evbayiro RRR-First Method, an anchored IRR
 workflow that begins with the Required Rate of Return (RRR), evaluates NPV at

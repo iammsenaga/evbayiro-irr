@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evbayiro-irr"
-version = "0.1.0"
+version = "0.1.1"
 description = "Decision-first IRR analysis anchored at the Required Rate of Return."
 readme = "README.md"
 requires-python = ">=3.9"
