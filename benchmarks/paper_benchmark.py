@@ -195,6 +195,7 @@ def base_row(case: BenchmarkCase, evbayiro_result) -> dict:
         "multiple_irr_detected": len(evbayiro_result.detected_irrs) > 1,
         "detected_irrs": "|".join(fmt_float(root) for root in evbayiro_result.detected_irrs),
         "decision_relevant_irr": fmt_float(evbayiro_result.decision_relevant_irr),
+        "root_applicable": evbayiro_result.decision_relevant_irr is not None,
         "rrr_to_decision_relevant_bps": root_error_bps(case.rrr, evbayiro_result),
     }
 
@@ -415,6 +416,8 @@ def summarize(rows: Iterable[dict]) -> list[dict]:
             {
                 "rows": 0,
                 "converged": 0,
+                "root_applicable": 0,
+                "root_converged_applicable": 0,
                 "other_root": 0,
                 "decision_evaluated": 0,
                 "decision_mismatch": 0,
@@ -425,8 +428,14 @@ def summarize(rows: Iterable[dict]) -> list[dict]:
             },
         )
         stats["rows"] += 1
-        if str(row["converged"]) == "True":
+        converged = str(row["converged"]) == "True"
+        root_applicable = str(row.get("root_applicable", "True")) == "True"
+        if converged:
             stats["converged"] += 1
+        if root_applicable:
+            stats["root_applicable"] += 1
+            if converged:
+                stats["root_converged_applicable"] += 1
         if row["root_relation"] == "other_root":
             stats["other_root"] += 1
         if row["decision_matches_npv"] in {"true", "false"}:
@@ -448,6 +457,13 @@ def summarize(rows: Iterable[dict]) -> list[dict]:
                 "rows": row_count,
                 "converged": int(stats["converged"]),
                 "convergence_rate": fmt_float(stats["converged"] / row_count if row_count else None),
+                "root_applicable": int(stats["root_applicable"]),
+                "root_converged_applicable": int(stats["root_converged_applicable"]),
+                "root_convergence_applicable_rate": fmt_float(
+                    stats["root_converged_applicable"] / stats["root_applicable"]
+                    if stats["root_applicable"]
+                    else None
+                ),
                 "other_root": int(stats["other_root"]),
                 "other_root_rate": fmt_float(stats["other_root"] / row_count if row_count else None),
                 "decision_evaluated": int(stats["decision_evaluated"]),
@@ -484,6 +500,7 @@ def write_csv(path: Path, rows: Sequence[dict]) -> None:
         "multiple_irr_detected",
         "detected_irrs",
         "decision_relevant_irr",
+        "root_applicable",
         "rrr_to_decision_relevant_bps",
         "method",
         "decision_rule",
@@ -513,6 +530,9 @@ def write_summary_csv(path: Path, rows: Sequence[dict]) -> None:
         "rows",
         "converged",
         "convergence_rate",
+        "root_applicable",
+        "root_converged_applicable",
+        "root_convergence_applicable_rate",
         "other_root",
         "other_root_rate",
         "decision_evaluated",

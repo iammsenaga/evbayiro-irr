@@ -29,6 +29,11 @@ The current result files are:
 Earlier result files from the first benchmark release are intentionally omitted
 from the current package to avoid mixing superseded and current evidence.
 
+Some non-conventional cash-flow sequences do not have an economically valid
+real IRR boundary even though their signs change more than once. These rows are
+kept in the dataset and marked with `root_applicable = False` so that decision
+completion and IRR-boundary convergence are not confused.
+
 The sourced benchmark is the primary dataset for external validation because it
 records the source name, source URL, required rate of return notes, cash-flow
 pattern, method output, convergence status, root relation, decision match, and

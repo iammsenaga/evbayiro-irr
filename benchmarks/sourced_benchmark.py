@@ -66,6 +66,7 @@ def write_sourced_csv(path: Path, rows: list[dict]) -> None:
         "multiple_irr_detected",
         "detected_irrs",
         "decision_relevant_irr",
+        "root_applicable",
         "rrr_to_decision_relevant_bps",
         "method",
         "decision_rule",

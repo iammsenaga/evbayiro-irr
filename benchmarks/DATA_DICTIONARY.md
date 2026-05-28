@@ -18,6 +18,9 @@
 - `multiple_irr_detected`: true when more than one IRR boundary is detected.
 - `detected_irrs`: detected roots separated by `|`.
 - `decision_relevant_irr`: IRR boundary relevant to the RRR region.
+- `root_applicable`: true when a valid decision-relevant IRR boundary exists;
+  false when the RRR decision can be evaluated but no real IRR boundary is
+  available.
 - `rrr_to_decision_relevant_bps`: basis-point distance between RRR and the
   decision-relevant IRR.
 
