@@ -5,9 +5,9 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$OutputJson,
 
-    [string]$ExistingDepositionId = "20429258",
+    [string]$ExistingDepositionId = "20435350",
 
-    [string]$DatasetVersion = "1.1.0"
+    [string]$DatasetVersion = "1.1.1"
 )
 
 $ErrorActionPreference = "Stop"

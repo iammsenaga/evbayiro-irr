@@ -3,9 +3,9 @@
 This dataset supports reproducible evaluation of Evbayiro-IRR against standard
 IRR root-finding methods.
 
-Dataset DOI: https://doi.org/10.5281/zenodo.20429258
+Dataset concept DOI: https://doi.org/10.5281/zenodo.20429257
 
-Current dataset package version: 1.1.0
+Current dataset package version: 1.1.1
 
 The dataset has three parts:
 
@@ -16,6 +16,18 @@ The dataset has three parts:
 - `company_proxy_cases.csv` and `results/expanded_benchmark*.csv`: expanded
   robustness evidence combining sourced cases, generated stress cases, and
   SEC Companyfacts firm-level free-cash-flow proxy sequences.
+
+The current result files are:
+
+- `results/sourced_benchmark_expanded_methods.csv`
+- `results/sourced_benchmark_expanded_methods_summary.csv`
+- `results/expanded_benchmark.csv`
+- `results/expanded_benchmark_summary.csv`
+- `results/expanded_benchmark_group_summary.csv`
+- `results/expanded_benchmark_case_mix.csv`
+
+Earlier result files from the first benchmark release are intentionally omitted
+from the current package to avoid mixing superseded and current evidence.
 
 The sourced benchmark is the primary dataset for external validation because it
 records the source name, source URL, required rate of return notes, cash-flow
