@@ -4,7 +4,6 @@ title: "Evbayiro-IRR: A Python Library for RRR-First Capital Budgeting Analysis"
 authors:
   - family-names: Evbayiro
     given-names: Osasenaga David
-version: 0.1.1
-doi: 10.5281/zenodo.20428636
-date-released: 2026-05-28
+version: 0.2.0
+date-released: 2026-06-19
 license: MIT

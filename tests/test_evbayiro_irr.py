@@ -7,9 +7,12 @@ from evbayiro_irr import (
     Decision,
     SearchDirection,
     bisection_irr,
+    brent_irr,
     classify_cashflows,
     count_sign_changes,
+    e3c_close_once,
     evbayiro_analysis,
+    iterated_e3c,
     newton_irr,
     npv,
     secant_irr,
@@ -50,8 +53,28 @@ class EvbayiroIRRTests(unittest.TestCase):
         self.assertAlmostEqual(result.bracket.lower_rate, 0.12)
         self.assertAlmostEqual(result.bracket.upper_rate, 0.13)
         self.assertAlmostEqual(result.estimated_irr, 0.1235, places=4)
+        self.assertEqual(result.closure_method, "iterated_e3c")
+        self.assertEqual(result.closure_status, "solved")
+        self.assertIsNotNone(result.closure_scaled_residual)
+        self.assertLessEqual(result.closure_scaled_residual, 1e-9)
 
-    def test_non_conventional_analysis_finds_all_roots_and_relevant_boundary(self):
+    def test_e3c_replaces_linear_interpolation_for_evbayiro_closure(self):
+        result = evbayiro_analysis(manuscript_example_2(), rrr=0.11)
+        self.assertIsNotNone(result.bracket)
+        self.assertIsNotNone(result.estimated_irr)
+
+        one_step = e3c_close_once(result.cashflows, result.bracket)
+        iterated = iterated_e3c(result.cashflows, result.bracket)
+
+        self.assertIsNotNone(one_step.rate)
+        self.assertIsNotNone(iterated.rate)
+        self.assertAlmostEqual(result.estimated_irr, iterated.rate)
+        self.assertLess(
+            abs(npv(iterated.rate, result.cashflows)),
+            abs(npv(result.bracket.interpolated_rate, result.cashflows)),
+        )
+
+    def test_non_conventional_analysis_finds_anchor_contiguous_boundaries(self):
         result = evbayiro_analysis(manuscript_non_conventional_example(), rrr=0.15)
         self.assertEqual(result.cashflow_type, CashflowType.NON_CONVENTIONAL)
         self.assertEqual(result.decision, Decision.ACCEPT)
@@ -60,6 +83,9 @@ class EvbayiroIRRTests(unittest.TestCase):
         self.assertAlmostEqual(result.detected_irrs[0], 0.06364095, places=5)
         self.assertAlmostEqual(result.detected_irrs[1], 0.37618669, places=5)
         self.assertAlmostEqual(result.decision_relevant_irr, 0.37618669, places=5)
+        self.assertEqual(len(result.detected_brackets), 2)
+        self.assertLess(result.detected_brackets[0].upper_rate, result.anchor_rate)
+        self.assertGreater(result.detected_brackets[1].lower_rate, result.anchor_rate)
         self.assertTrue(any("multiple IRRs" in warning for warning in result.warnings))
 
     def test_newton_and_secant_are_seed_sensitive_on_non_conventional_example(self):
@@ -84,6 +110,14 @@ class EvbayiroIRRTests(unittest.TestCase):
         self.assertTrue(result.converged)
         self.assertAlmostEqual(result.root, 1.0)
         self.assertAlmostEqual(result.npv_at_root, 0.0)
+
+    def test_brent_closes_known_non_conventional_bracket(self):
+        cashflows = manuscript_non_conventional_example()
+        result = brent_irr(cashflows, lower_rate=0.37, upper_rate=0.38)
+
+        self.assertTrue(result.converged)
+        self.assertAlmostEqual(result.root, 0.37618669, places=5)
+        self.assertLess(abs(result.npv_at_root), 1e-6)
 
     def test_no_rrr_uses_evbayiro_constant_without_decision(self):
         result = evbayiro_analysis(manuscript_example_2())
