@@ -108,6 +108,10 @@ def format_result(result: EvbayiroResult, *, show_path: bool = False) -> str:
         f"Anchored bracket: {_format_bracket(result.bracket)}",
         f"Estimated IRR: {format_rate(result.estimated_irr)}",
         f"Decision-relevant IRR: {format_rate(result.decision_relevant_irr)}",
+        f"Closure method: {result.closure_method}",
+        f"Closure status: {result.closure_status or 'None'}",
+        f"Closure iterations: {result.closure_iterations if result.closure_iterations is not None else 'None'}",
+        f"Scaled zero-NPV residual: {result.closure_scaled_residual if result.closure_scaled_residual is not None else 'None'}",
     ]
 
     if result.detected_irrs:
@@ -158,6 +162,10 @@ def result_to_dict(result: EvbayiroResult) -> dict:
         "detected_irrs": list(result.detected_irrs),
         "decision_relevant_bracket": _bracket_to_dict(result.decision_relevant_bracket),
         "decision_relevant_irr": result.decision_relevant_irr,
+        "closure_method": result.closure_method,
+        "closure_iterations": result.closure_iterations,
+        "closure_status": result.closure_status,
+        "closure_scaled_residual": result.closure_scaled_residual,
         "warnings": list(result.warnings),
     }
 
@@ -208,19 +216,25 @@ def build_parser() -> argparse.ArgumentParser:
         "--profile-min-rate",
         type=parse_rate,
         default=-0.99,
-        help="Minimum rate for non-conventional profile scanning. Default: -99%%.",
+        help="Compatibility option from earlier profile-scan releases; validated but not used by the E3C workflow.",
     )
     parser.add_argument(
         "--profile-max-rate",
         type=parse_rate,
         default=1.0,
-        help="Maximum rate for non-conventional profile scanning. Default: 100%%.",
+        help="Compatibility option from earlier profile-scan releases; validated but not used by the E3C workflow.",
     )
     parser.add_argument(
         "--max-steps",
         type=int,
         default=1000,
         help="Maximum anchored step movements. Default: 1000.",
+    )
+    parser.add_argument(
+        "--closure-max-iterations",
+        type=int,
+        default=100,
+        help="Maximum E3C closure iterations. Default: 100.",
     )
     parser.add_argument(
         "--show-path",
@@ -247,6 +261,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         rrr=args.rrr,
         step=args.step,
         max_steps=args.max_steps,
+        closure_max_iterations=args.closure_max_iterations,
         profile_min_rate=args.profile_min_rate,
         profile_max_rate=args.profile_max_rate,
     )

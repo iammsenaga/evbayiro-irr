@@ -95,6 +95,10 @@ class EvbayiroResult:
     decision_relevant_bracket: Optional[IRRBracket]
     decision_relevant_irr: Optional[float]
     warnings: Tuple[str, ...]
+    closure_method: str = "iterated_e3c"
+    closure_iterations: Optional[int] = None
+    closure_status: Optional[str] = None
+    closure_scaled_residual: Optional[float] = None
 
     @property
     def is_viable(self) -> Optional[bool]:
@@ -118,4 +122,3 @@ class SolverResult:
     converged: bool
     status: str
     path: Tuple[TrialPoint, ...]
-

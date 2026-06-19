@@ -135,3 +135,88 @@ def bisection_irr(
     root_npv = _npv_from_validated_cashflows(root, values)
     path.append(TrialPoint(root, root_npv))
     return SolverResult("bisection", root, root_npv, len(path), True, "converged", tuple(path))
+
+
+def brent_irr(
+    cashflows: Sequence[float],
+    *,
+    lower_rate: float,
+    upper_rate: float,
+    tolerance: float = DEFAULT_TOLERANCE,
+    max_iterations: int = 100,
+) -> SolverResult:
+    """Find an IRR inside a known sign-changing bracket using Brent's method."""
+
+    values = as_cashflow_tuple(cashflows)
+    a = float(lower_rate)
+    b = float(upper_rate)
+    fa = _npv_from_validated_cashflows(a, values)
+    fb = _npv_from_validated_cashflows(b, values)
+    path = [TrialPoint(a, fa), TrialPoint(b, fb)]
+
+    if abs(fa) <= tolerance:
+        return SolverResult("brent", a, fa, len(path), True, "converged", tuple(path))
+    if abs(fb) <= tolerance:
+        return SolverResult("brent", b, fb, len(path), True, "converged", tuple(path))
+    if not signs_differ(fa, fb, tolerance=tolerance):
+        return SolverResult("brent", None, None, 0, False, "no_sign_change", tuple(path))
+
+    if abs(fa) < abs(fb):
+        a, b = b, a
+        fa, fb = fb, fa
+
+    c = a
+    fc = fa
+    d = e = b - a
+
+    for iteration in range(1, max_iterations + 1):
+        if fb == 0 or abs(b - a) <= tolerance:
+            return SolverResult("brent", b, fb, iteration, True, "converged", tuple(path))
+
+        if fa != fc and fb != fc:
+            # Inverse quadratic interpolation.
+            s = (
+                a * fb * fc / ((fa - fb) * (fa - fc))
+                + b * fa * fc / ((fb - fa) * (fb - fc))
+                + c * fa * fb / ((fc - fa) * (fc - fb))
+            )
+        else:
+            # Secant step.
+            s = b - fb * (b - a) / (fb - fa)
+
+        midpoint = (3 * a + b) / 4
+        interpolation_ok = (
+            min(midpoint, b) < s < max(midpoint, b)
+            and abs(s - b) < abs(e) / 2
+            and abs(e) > tolerance
+        )
+        if not interpolation_ok:
+            s = (a + b) / 2
+            e = d = b - a
+        else:
+            e = d
+            d = b - s
+
+        try:
+            fs = _npv_from_validated_cashflows(s, values)
+        except ValueError:
+            return SolverResult("brent", None, None, iteration, False, "invalid_rate", tuple(path))
+        path.append(TrialPoint(s, fs))
+
+        c = a
+        fc = fa
+        if signs_differ(fa, fs, tolerance=tolerance):
+            b = s
+            fb = fs
+        else:
+            a = s
+            fa = fs
+
+        if abs(fa) < abs(fb):
+            a, b = b, a
+            fa, fb = fb, fa
+
+        if abs(fb) <= tolerance:
+            return SolverResult("brent", b, fb, iteration, True, "converged", tuple(path))
+
+    return SolverResult("brent", b, fb, max_iterations, False, "max_iterations", tuple(path))

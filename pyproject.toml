@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evbayiro-irr"
-version = "0.1.1"
+version = "0.2.0"
 description = "Decision-first IRR analysis anchored at the Required Rate of Return."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -37,6 +37,12 @@ classifiers = [
   "Typing :: Typed"
 ]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/iammsenaga/evbayiro-irr"
+Repository = "https://github.com/iammsenaga/evbayiro-irr"
+Issues = "https://github.com/iammsenaga/evbayiro-irr/issues"
+Changelog = "https://github.com/iammsenaga/evbayiro-irr/blob/main/CHANGELOG.md"
 
 [project.scripts]
 evbayiro-irr = "evbayiro_irr.cli:main"

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.0 - 2026-06-19
+
+- Replaced the Evbayiro workflow's two-point interpolation closure with the
+  Evbayiro Three-Point Curvature Closure (E3C).
+- Added Iterated E3C with the scaled zero-NPV residual
+  `R(r) = |NPV(r)| / sum(|CF_t|)` and a configurable iteration cap.
+- Corrected non-conventional analysis to scan both upward and downward from
+  the RRR and report anchor-contiguous IRR boundaries.
+- Added closure method, status, iteration count, and residual fields to the
+  structured result and command-line output.
+- Exposed one-step E3C, Iterated E3C, and residual helpers through the public
+  Python API.
+- Added Brent's method as a known-bracket comparison solver; it is not used by
+  the Evbayiro analysis workflow.
+- Expanded tests for E3C closure, bidirectional non-conventional analysis,
+  result reporting, and comparison solvers.
+
 ## 0.1.1 - 2026-05-28
 
 - Added public repository badges to the README.
