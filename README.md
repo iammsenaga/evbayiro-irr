@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/evbayiro-irr.svg)](https://pypi.org/project/evbayiro-irr/)
 [![CI](https://github.com/iammsenaga/evbayiro-irr/actions/workflows/ci.yml/badge.svg)](https://github.com/iammsenaga/evbayiro-irr/actions/workflows/ci.yml)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20428636.svg)](https://doi.org/10.5281/zenodo.20428636)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20428635.svg)](https://doi.org/10.5281/zenodo.20428635)
 [![Benchmark DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20514086.svg)](https://doi.org/10.5281/zenodo.20514086)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -138,6 +138,8 @@ python -m unittest discover -s tests
 
 The benchmark dataset used for comparative analysis is archived separately:
 
+- Software concept DOI: https://doi.org/10.5281/zenodo.20428635
+- Version 0.2.0 software DOI: https://doi.org/10.5281/zenodo.20767632
 - Dataset concept DOI: https://doi.org/10.5281/zenodo.20429257
 - Latest dataset version DOI: https://doi.org/10.5281/zenodo.20514086
 - Current benchmark package: 88,556 SEC/Damodaran public-company cash-flow
