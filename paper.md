@@ -48,7 +48,7 @@ The software has a published methodological foundation in the RRR-First capital-
 
 # AI usage disclosure
 
-OpenAI Codex, a GPT-5-based coding agent, was used to assist with software development and review, test and documentation work, and preparation and editing of this paper. The author reviewed and edited AI-assisted material, checked the software description against the public source repository and release, and is responsible for the accuracy and integrity of the final submission. The core problem framing and algorithmic design decisions remain the author's.
+OpenAI Codex (GPT-5; accessed 10 November 2026) was used to assist with software development and review, testing and documentation, and preparation and editing of this paper. The author reviewed and edited AI-assisted material, checked the software description against the public source repository and release, and is responsible for the accuracy and integrity of the final submission. The core problem framing and algorithmic design decisions remain the author's.
 
 # Acknowledgements
 
